@@ -178,7 +178,7 @@ class FIE(nn.Module):
         x = x + attn
         x2 = self.norm_2(x)
         x = x + self.ff(x2)
-        return x, enc_attn
+        return x
 
 
 
@@ -313,21 +313,19 @@ class BMN(nn.Module):
             nn.Conv2d(self.hidden_dim_2d, 2, kernel_size=1),
             nn.Sigmoid()
         )
-        self.fie = FIE(100, heads=1)
+        self.fie = FIE(256, heads=1)
 
     def forward(self, x, recons=False, clip_order=False):  # [B,400,100]
-
+        x = x.transpose(1, 2)
+        x = self.fie(x, None)
+        x = x.transpose(1, 2)
         base_feature = self.x_1d_b(x)  # [B,256,100]
         recons_feature = self.recons(base_feature)
         if recons:
             return recons_feature
-        print("shape", base_feature.shape)
-        print("size", base_feature.size())
-        print(x.shape)
-        x = x.transpose(1, 2)
-        print(x.shape)
-        x = self.fie(x, None)
-        x = x.transpose(1, 2)
+        # print("shape", base_feature.shape)
+        # print("size", base_feature.size())
+
         batch_size, C, T = base_feature.size()
         if clip_order:
             return self.clip_order_linear(self.clip_order_drop(self.clip_order(base_feature).view(batch_size, T)))
