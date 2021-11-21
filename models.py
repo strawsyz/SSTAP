@@ -315,16 +315,17 @@ class BMN(nn.Module):
         )
         self.fie = FIE(opt["feat_dim"] , heads=1)
 
-    def forward(self, x, recons=False, clip_order=False):                   # [B,400,100]
-        print(x.shape)
-        x = x.transpose(1,2)
-        print(x.shape)
-        x = self.fie(x,None)
-        x = x.transpose(1,2)
-        base_feature = self.x_1d_b(x)                # [B,256,100]
+    def forward(self, x, recons=False, clip_order=False):  # [B,400,100]
+        # print(x.shape)
+        # x = x.transpose(1,2)
+        # print(x.shape)
+        # x = self.fie(x,None)
+        # x = x.transpose(1,2)
+        base_feature = self.x_1d_b(x)  # [B,256,100]
         recons_feature = self.recons(base_feature)
         if recons:
             return recons_feature
+        print(base_feature.shape)
         batch_size, C, T = base_feature.size()
         if clip_order:
             return self.clip_order_linear(self.clip_order_drop(self.clip_order(base_feature).view(batch_size, T)))
