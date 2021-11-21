@@ -620,6 +620,7 @@ def test_BMN_ema(data_loader, model, epoch, bm_mask):
         model.module.tem_best_loss = epoch_loss
         torch.save(state, opt["checkpoint_path"] + "/BMN_best_ema.pth.tar")
 
+# wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=FILEID' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=FILEID" -O FILENAME && rm -rf /tmp/cookies.txt
 
 def BMN_Train(opt):
     model = BMN(opt)

@@ -146,6 +146,99 @@ class InplaceShift(torch.autograd.Function):
         return grad_output, None
 
 
+
+
+class Norm(nn.Module):
+    def __init__(self, embedding_dim, eps=1e-6):
+        super().__init__()
+
+        self.size = embedding_dim
+
+        self.alpha = nn.Parameter(torch.ones(self.size))
+        self.bias = nn.Parameter(torch.zeros(self.size))
+
+        self.eps = eps
+
+    def forward(self, x):
+        norm = self.alpha * (x - x.mean(dim=-1, keepdim=True)) \
+               / (x.std(dim=-1, keepdim=True) + self.eps) + self.bias
+        return norm
+
+class FIE(nn.Module):
+    def __init__(self, embedding_dim, heads, importance_threshold=0):
+        super().__init__()
+        self.norm_1 = Norm(embedding_dim)
+        self.norm_2 = Norm(embedding_dim)
+        self.attn = SimpleMultiHeadAttentionTrue(heads, embedding_dim, importance_threshold)
+        self.ff = FeedForward(embedding_dim, d_ff=2 * embedding_dim)
+
+    def forward(self, x, mask):
+        x2 = self.norm_1(x)
+        attn, enc_attn = self.attn(x2, x2, x2, mask, dec_mask=False)
+        x = x + attn
+        x2 = self.norm_2(x)
+        x = x + self.ff(x2)
+        return x, enc_attn
+
+
+
+class SimpleMultiHeadAttentionTrue(nn.Module):
+    def __init__(self, heads, embedding_dim, importance_threshold=0):
+        super().__init__()
+        assert heads == 1
+        self.embedding_dim = embedding_dim
+        self.d_k = embedding_dim // heads
+        self.h = heads
+        self.importance_threshold = importance_threshold
+
+        # self.out = nn.Linear(embedding_dim, embedding_dim)
+
+    def forward(self, q, k, v, mask=None, dec_mask=False):
+        bs = q.size(0)
+        #
+        # k = k.view(bs, -1, self.h, self.d_k)
+        # q = q.view(bs, -1, self.h, self.d_k)
+        # v = v.view(bs, -1, self.h, self.d_k)
+
+        # k = k.transpose(1, 2)
+        # q = q.transpose(1, 2)
+        # v = v.transpose(1, 2)
+
+        scores, attn = attention(q, k, v, self.d_k, mask, dec_mask, self.importance_threshold)
+
+        # concat = scores.transpose(1, 2).contiguous().view(bs, -1, self.embedding_dim)
+        # output = self.out(concat)
+
+        return scores, attn
+
+
+def attention(q, k, v, d_k, mask=None, dec_mask=False, important_threshold=0):
+    scores = torch.matmul(q, k.transpose(-2, -1))
+    # scores = torch.matmul(q, k.transpose(-2, -1)) / math.sqrt(d_k)
+    # if mask is not None:
+    #     if dec_mask:
+    #         mask = mask.view(mask.size(0), 1, mask.size(1), mask.size(2))
+    #     else:
+    #         mask = mask.unsqueeze(1)
+    #     scores = scores.masked_fill(mask == 0, -1e9)
+    scores = scores - important_threshold
+    scores = F.softmax(scores, dim=-1)
+
+    output = torch.matmul(scores, v)
+    return output, scores
+
+class FeedForward(nn.Module):
+    def __init__(self, embedding_dim, d_ff=2048):
+        super().__init__()
+
+        self.linear_1 = nn.Linear(embedding_dim, d_ff)
+        self.linear_2 = nn.Linear(d_ff, embedding_dim)
+
+    def forward(self, x):
+        x = F.relu(self.linear_1(x))
+        x = self.linear_2(x)
+        return x
+
 class BMN(nn.Module):
     def __init__(self, opt):
         super(BMN, self).__init__()
@@ -220,8 +313,11 @@ class BMN(nn.Module):
             nn.Conv2d(self.hidden_dim_2d, 2, kernel_size=1),
             nn.Sigmoid()                
         )
+        self.fie = FIE(opt["feat_dim"] , heads=1)
 
     def forward(self, x, recons=False, clip_order=False):                   # [B,400,100]
+        # print(x.shape)
+        x = self.fie(x)
         base_feature = self.x_1d_b(x)                # [B,256,100]
         recons_feature = self.recons(base_feature)
         if recons:
