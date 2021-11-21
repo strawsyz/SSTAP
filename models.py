@@ -316,7 +316,7 @@ class BMN(nn.Module):
         self.fie = FIE(opt["feat_dim"] , heads=1)
 
     def forward(self, x, recons=False, clip_order=False):                   # [B,400,100]
-        # print(x.shape)
+        print(x.shape)
         x = x.transpose(1,2)
         print(x.shape)
         x = self.fie(x,None)
