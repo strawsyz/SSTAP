@@ -318,6 +318,7 @@ class BMN(nn.Module):
     def forward(self, x, recons=False, clip_order=False):                   # [B,400,100]
         # print(x.shape)
         x = x.transpose(1,2)
+        print(x.shape)
         x = self.fie(x,None)
         x = x.transpose(1,2)
         base_feature = self.x_1d_b(x)                # [B,256,100]
