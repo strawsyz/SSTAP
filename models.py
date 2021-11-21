@@ -311,31 +311,33 @@ class BMN(nn.Module):
             nn.Conv2d(self.hidden_dim_2d, self.hidden_dim_2d, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
             nn.Conv2d(self.hidden_dim_2d, 2, kernel_size=1),
-            nn.Sigmoid()                
+            nn.Sigmoid()
         )
-        self.fie = FIE(opt["feat_dim"] , heads=1)
+        self.fie = FIE(100, heads=1)
 
     def forward(self, x, recons=False, clip_order=False):  # [B,400,100]
-        # print(x.shape)
-        # x = x.transpose(1,2)
-        # print(x.shape)
-        # x = self.fie(x,None)
-        # x = x.transpose(1,2)
+
         base_feature = self.x_1d_b(x)  # [B,256,100]
         recons_feature = self.recons(base_feature)
         if recons:
             return recons_feature
-        print(base_feature.shape)
+        print("shape", base_feature.shape)
+        print("size", base_feature.size())
+        print(x.shape)
+        x = x.transpose(1, 2)
+        print(x.shape)
+        x = self.fie(x, None)
+        x = x.transpose(1, 2)
         batch_size, C, T = base_feature.size()
         if clip_order:
             return self.clip_order_linear(self.clip_order_drop(self.clip_order(base_feature).view(batch_size, T)))
         start = self.x_1d_s(base_feature).squeeze(1)  # [B,1,100]->[B,100] sigmoid()
         end = self.x_1d_e(base_feature).squeeze(1)
-        confidence_map = self.x_1d_p(base_feature)    # [B,256,100]———>[B,256,100]+relu()
+        confidence_map = self.x_1d_p(base_feature)  # [B,256,100]———>[B,256,100]+relu()
         confidence_map = self._boundary_matching_layer(confidence_map)  # [B, 256, 32, 100, 100]
         # set_trace()
         confidence_map = self.x_3d_p(confidence_map).squeeze(2)
-        confidence_map = self.x_2d_p(confidence_map)    # [B, 2, 100, 100]
+        confidence_map = self.x_2d_p(confidence_map)  # [B, 2, 100, 100]
         return confidence_map, start, end      # [B, 2, 100, 100], [B,100],[B,100]
 
     def _boundary_matching_layer(self, x):
