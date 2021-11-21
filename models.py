@@ -317,7 +317,7 @@ class BMN(nn.Module):
 
     def forward(self, x, recons=False, clip_order=False):                   # [B,400,100]
         # print(x.shape)
-        x = self.fie(x)
+        x = self.fie(x,None)
         base_feature = self.x_1d_b(x)                # [B,256,100]
         recons_feature = self.recons(base_feature)
         if recons:
