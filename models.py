@@ -313,7 +313,7 @@ class BMN(nn.Module):
             nn.Conv2d(self.hidden_dim_2d, 2, kernel_size=1),
             nn.Sigmoid()
         )
-        self.fie = FIE(256, heads=1)
+        self.fie = FIE(400, heads=1)
 
     def forward(self, x, recons=False, clip_order=False):  # [B,400,100]
         x = x.transpose(1, 2)
