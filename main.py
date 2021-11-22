@@ -28,7 +28,7 @@ torch.manual_seed(seed)
 torch.backends.cudnn.benchmark = False
 torch.backends.cudnn.deterministic = True
 
-os.environ["CUDA_VISIBLE_DEVICES"] = '0,1,2,3'
+os.environ["CUDA_VISIBLE_DEVICES"] = '4,5,6,7'
 blue = lambda x: '\033[94m' + x + '\033[0m'
 sys.dont_write_bytecode = True
 global_step = 0
@@ -849,7 +849,8 @@ def main(opt):
 
 
 if __name__ == '__main__':
-    device_ids = [0, 1, 2, 3]
+    # device_ids = [0, 1, 2, 3]
+    device_ids = [4, 5, 6, 7]
     opt = opts.parse_opt()
     opt = vars(opt)
     if not os.path.exists(opt["checkpoint_path"]):
