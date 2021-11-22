@@ -57,16 +57,19 @@ def plot_metric(opt,average_nr_proposals, average_recall, recall, tiou_threshold
     plt.savefig(opt["save_fig_path"])
 
 def evaluation_proposal(opt):
-    
+
     uniform_average_nr_proposals_valid, uniform_average_recall_valid, uniform_recall_valid = run_evaluation(
-        "./Evaluation/data/activity_net_1_3_new.json",   # filter_activity_net_1_3_new.json
+        "./Evaluation/data/activity_net_1_3_new.json",  # filter_activity_net_1_3_new.json
         opt["result_file"],
         max_avg_nr_proposals=100,
         tiou_thresholds=np.linspace(0.5, 0.95, 10),
         subset='validation')
-    
-    plot_metric(opt,uniform_average_nr_proposals_valid, uniform_average_recall_valid, uniform_recall_valid)
-    print( "AR@1 is \t",np.mean(uniform_recall_valid[:,0]))
-    print( "AR@5 is \t",np.mean(uniform_recall_valid[:,4]))
-    print( "AR@10 is \t",np.mean(uniform_recall_valid[:,9]))
-    print( "AR@100 is \t",np.mean(uniform_recall_valid[:,-1]))
+    print(f"uniform_average_nr_proposals_valid:{uniform_average_nr_proposals_valid}")
+    print(f"uniform_average_recall_valid:{uniform_average_recall_valid}")
+    print(f"uniform_recall_valid:{uniform_recall_valid}")
+
+    plot_metric(opt, uniform_average_nr_proposals_valid, uniform_average_recall_valid, uniform_recall_valid)
+    print("AR@1 is \t", np.mean(uniform_recall_valid[:, 0]))
+    print("AR@5 is \t", np.mean(uniform_recall_valid[:, 4]))
+    print("AR@10 is \t", np.mean(uniform_recall_valid[:, 9]))
+    print("AR@100 is \t", np.mean(uniform_recall_valid[:, -1]))
