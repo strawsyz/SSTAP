@@ -850,8 +850,8 @@ if __name__ == '__main__':
     consistency_rampup = 5
     consistency = 6  # 30  # 3  # None
 
-    # device_ids = [0, 1, 2, 3]
-    device_ids = [4, 5, 6, 7]
+    device_ids = [0, 1, 2, 3]
+    # device_ids = [4, 5, 6, 7]
     opt = opts.parse_opt()
     opt = vars(opt)
     if not os.path.exists(opt["checkpoint_path"]):
