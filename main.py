@@ -28,7 +28,7 @@ torch.manual_seed(seed)
 torch.backends.cudnn.benchmark = False
 torch.backends.cudnn.deterministic = True
 
-os.environ["CUDA_VISIBLE_DEVICES"] = '0,1,2,3'
+os.environ["CUDA_VISIBLE_DEVICES"] = '1,2,3'
 blue = lambda x: '\033[94m' + x + '\033[0m'
 sys.dont_write_bytecode = True
 global_step = 0
@@ -623,9 +623,9 @@ def test_BMN_ema(data_loader, model, epoch, bm_mask):
 
 def BMN_Train(opt):
     model = BMN(opt)
-    model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3]).cuda()
+    model = torch.nn.DataParallel(model, device_ids=[1, 2, 3]).cuda()
     model_ema = BMN(opt)
-    model_ema = torch.nn.DataParallel(model_ema, device_ids=[0, 1, 2, 3]).cuda()
+    model_ema = torch.nn.DataParallel(model_ema, device_ids=[1, 2, 3]).cuda()
     for param in model_ema.parameters():
         param.detach_()
     optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=opt["training_lr"],         
@@ -671,7 +671,7 @@ def BMN_Train(opt):
 
 def BMN_inference(opt, eval_name):
     model = BMN(opt)
-    model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3]).cuda()
+    model = torch.nn.DataParallel(model, device_ids=[1, 2, 3]).cuda()
     model_checkpoint_dir = opt["checkpoint_path"] + eval_name   # BMN_checkpoint.pth.tar  BMN_best.pth.tar
     checkpoint = torch.load(model_checkpoint_dir)       # BMN_best.pth.tar
     print('load :', model_checkpoint_dir, ' OK !')
@@ -749,7 +749,7 @@ def BMN_inference(opt, eval_name):
 
 def BMN_inference_ema(opt, eval_name):
     model = BMN(opt)
-    model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3]).cuda()
+    model = torch.nn.DataParallel(model, device_ids=[ 1, 2, 3]).cuda()
     model_checkpoint_dir = opt["checkpoint_path"] + eval_name   # BMN_checkpoint.pth.tar  BMN_best.pth.tar
     checkpoint = torch.load(model_checkpoint_dir)       # BMN_best.pth.tar
     print('load :', model_checkpoint_dir, ' OK !')
