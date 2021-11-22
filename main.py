@@ -18,24 +18,6 @@ from post_processing import BMN_post_processing
 from eval import evaluation_proposal
 from ipdb import set_trace
 
-seed = 400
-torch.manual_seed(seed)
-torch.cuda.manual_seed(seed)
-torch.cuda.manual_seed_all(seed)
-np.random.seed(seed)  # Numpy module.
-random.seed(seed)  # Python random module.
-torch.manual_seed(seed)
-torch.backends.cudnn.benchmark = False
-torch.backends.cudnn.deterministic = True
-
-os.environ["CUDA_VISIBLE_DEVICES"] = '4,5,6,7'
-blue = lambda x: '\033[94m' + x + '\033[0m'
-sys.dont_write_bytecode = True
-global_step = 0
-eval_loss = []
-consistency_rampup = 5
-consistency = 6  # 30  # 3  # None
-
 
 def update_ema_variables(model, ema_model, alpha, global_step):
     # Use the true average until the exponential average is more correct
@@ -849,6 +831,25 @@ def main(opt):
 
 
 if __name__ == '__main__':
+
+    seed = 400
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    np.random.seed(seed)  # Numpy module.
+    random.seed(seed)  # Python random module.
+    torch.manual_seed(seed)
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True
+
+    os.environ["CUDA_VISIBLE_DEVICES"] = '4,5,6,7'
+    blue = lambda x: '\033[94m' + x + '\033[0m'
+    sys.dont_write_bytecode = True
+    global_step = 0
+    eval_loss = []
+    consistency_rampup = 5
+    consistency = 6  # 30  # 3  # None
+
     # device_ids = [0, 1, 2, 3]
     device_ids = [4, 5, 6, 7]
     opt = opts.parse_opt()
